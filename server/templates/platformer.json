@@ -1,0 +1,98 @@
+{
+  "name": "platformer",
+  "displayName": "Platform Adventure",
+  "description": "Classic side-scrolling platformer with jumping mechanics",
+  "type": "platformer",
+  "thumbnail": "/templates/platformer-thumb.png",
+  "defaultConfig": {
+    "type": "platformer",
+    "width": 800,
+    "height": 600,
+    "player": {
+      "speed": 160,
+      "jumpHeight": 400,
+      "sprite": "player_platformer"
+    },
+    "world": {
+      "gravity": 300,
+      "background": "#87CEEB",
+      "platforms": [
+        {
+          "x": 0,
+          "y": 568,
+          "width": 800,
+          "height": 32,
+          "sprite": "ground"
+        },
+        {
+          "x": 200,
+          "y": 450,
+          "width": 200,
+          "height": 32,
+          "sprite": "platform"
+        },
+        {
+          "x": 500,
+          "y": 350,
+          "width": 150,
+          "height": 32,
+          "sprite": "platform"
+        }
+      ]
+    },
+    "enemies": [
+      {
+        "type": "goomba",
+        "speed": 50,
+        "sprite": "enemy_goomba",
+        "x": 300,
+        "y": 520,
+        "health": 1,
+        "points": 100
+      },
+      {
+        "type": "goomba",
+        "speed": 40,
+        "sprite": "enemy_goomba",
+        "x": 600,
+        "y": 520,
+        "health": 1,
+        "points": 100
+      }
+    ],
+    "collectibles": [
+      {
+        "type": "coin",
+        "points": 10,
+        "sprite": "coin",
+        "x": 250,
+        "y": 400
+      },
+      {
+        "type": "coin",
+        "points": 10,
+        "sprite": "coin",
+        "x": 550,
+        "y": 300
+      },
+      {
+        "type": "powerup",
+        "points": 50,
+        "sprite": "powerup",
+        "x": 700,
+        "y": 520
+      }
+    ],
+    "controls": {
+      "left": "A",
+      "right": "D",
+      "jump": "SPACE"
+    },
+    "gameRules": {
+      "winCondition": "collect_all_coins",
+      "loseCondition": "touch_enemy",
+      "lives": 3,
+      "timeLimit": 120
+    }
+  }
+}

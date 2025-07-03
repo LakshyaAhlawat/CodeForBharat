@@ -1,0 +1,74 @@
+{
+  "name": "runner",
+  "displayName": "Endless Runner",
+  "description": "Fast-paced endless running game with obstacles",
+  "type": "runner",
+  "thumbnail": "/templates/runner-thumb.png",
+  "defaultConfig": {
+    "type": "runner",
+    "width": 800,
+    "height": 600,
+    "player": {
+      "speed": 200,
+      "jumpHeight": 350,
+      "sprite": "player_runner"
+    },
+    "world": {
+      "gravity": 400,
+      "background": "#FF6B6B",
+      "scrollSpeed": 150,
+      "platforms": [
+        {
+          "x": 0,
+          "y": 568,
+          "width": 1600,
+          "height": 32,
+          "sprite": "ground_runner"
+        }
+      ]
+    },
+    "enemies": [
+      {
+        "type": "obstacle",
+        "speed": 0,
+        "sprite": "spike",
+        "spawnRate": 2000,
+        "health": 1,
+        "points": 0
+      },
+      {
+        "type": "moving_enemy",
+        "speed": 80,
+        "sprite": "enemy_bird",
+        "spawnRate": 3000,
+        "health": 1,
+        "points": 20
+      }
+    ],
+    "collectibles": [
+      {
+        "type": "coin",
+        "points": 10,
+        "sprite": "coin_runner",
+        "spawnRate": 1500
+      },
+      {
+        "type": "boost",
+        "points": 0,
+        "sprite": "speed_boost",
+        "effect": "speed_increase",
+        "spawnRate": 8000
+      }
+    ],
+    "controls": {
+      "jump": "SPACE",
+      "slide": "S"
+    },
+    "gameRules": {
+      "winCondition": "survive_time",
+      "loseCondition": "touch_obstacle",
+      "endless": true,
+      "speedIncrease": 10
+    }
+  }
+}

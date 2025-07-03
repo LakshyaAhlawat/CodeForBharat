@@ -1,0 +1,78 @@
+{
+  "name": "shooter",
+  "displayName": "Space Shooter",
+  "description": "Defend against waves of space invaders",
+  "type": "shooter",
+  "thumbnail": "/templates/shooter-thumb.png",
+  "defaultConfig": {
+    "type": "shooter",
+    "width": 800,
+    "height": 600,
+    "player": {
+      "speed": 200,
+      "jumpHeight": 0,
+      "sprite": "spaceship",
+      "fireRate": 300
+    },
+    "world": {
+      "gravity": 0,
+      "background": "#000033",
+      "bounds": {
+        "left": 0,
+        "right": 800,
+        "top": 0,
+        "bottom": 600
+      }
+    },
+    "enemies": [
+      {
+        "type": "alien_basic",
+        "speed": 50,
+        "sprite": "alien1",
+        "spawnRate": 2000,
+        "health": 1,
+        "points": 10,
+        "fireRate": 1500
+      },
+      {
+        "type": "alien_strong",
+        "speed": 30,
+        "sprite": "alien2",
+        "spawnRate": 5000,
+        "health": 3,
+        "points": 30,
+        "fireRate": 1000
+      }
+    ],
+    "collectibles": [
+      {
+        "type": "power_upgrade",
+        "points": 0,
+        "sprite": "powerup_weapon",
+        "effect": "double_shot",
+        "spawnRate": 10000
+      },
+      {
+        "type": "health_pack",
+        "points": 0,
+        "sprite": "health",
+        "effect": "restore_health",
+        "spawnRate": 15000
+      }
+    ],
+    "controls": {
+      "left": "A",
+      "right": "D",
+      "up": "W",
+      "down": "S",
+      "shoot": "SPACE"
+    },
+    "gameRules": {
+      "winCondition": "survive_waves",
+      "loseCondition": "lose_all_lives",
+      "lives": 3,
+      "waves": 5,
+      "enemiesPerWave": 10
+    }
+  }
+}

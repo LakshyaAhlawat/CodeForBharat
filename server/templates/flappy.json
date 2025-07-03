@@ -1,0 +1,58 @@
+{
+  "name": "flappy",
+  "displayName": "Flappy Bird Style",
+  "description": "Navigate through pipes by flapping wings",
+  "type": "flappy",
+  "thumbnail": "/templates/flappy-thumb.png",
+  "defaultConfig": {
+    "type": "flappy",
+    "width": 800,
+    "height": 600,
+    "player": {
+      "speed": 0,
+      "jumpHeight": 300,
+      "sprite": "bird",
+      "flapForce": -250
+    },
+    "world": {
+      "gravity": 600,
+      "background": "#70C5CE",
+      "scrollSpeed": 120
+    },
+    "enemies": [
+      {
+        "type": "pipe_top",
+        "speed": 0,
+        "sprite": "pipe_top",
+        "spawnRate": 2500,
+        "health": 1,
+        "points": 0
+      },
+      {
+        "type": "pipe_bottom",
+        "speed": 0,
+        "sprite": "pipe_bottom",
+        "spawnRate": 2500,
+        "health": 1,
+        "points": 0
+      }
+    ],
+    "collectibles": [
+      {
+        "type": "star",
+        "points": 1,
+        "sprite": "star",
+        "spawnRate": 3000
+      }
+    ],
+    "controls": {
+      "flap": "SPACE"
+    },
+    "gameRules": {
+      "winCondition": "high_score",
+      "loseCondition": "touch_pipe_or_ground",
+      "scoringMethod": "pass_through_pipes",
+      "endless": true
+    }
+  }
+}
