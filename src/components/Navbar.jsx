@@ -35,44 +35,51 @@ const Navbar = () => {
   const navItems = isAuthenticated ? [...publicNavItems, ...privateNavItems] : publicNavItems;
 
   return (
-    <nav className="bg-gray-800 text-white shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-gray-800 text-white shadow-lg sticky top-0 z-50 navbar-compact">
+      <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex justify-between items-center h-16">
-          {/* Logo / Title */}
+          {/* Logo / Title - More compact */}
           <Link
             to="/"
-            className="flex items-center text-xl sm:text-2xl font-extrabold text-white tracking-tight"
+            className="flex items-center logo-responsive font-extrabold text-white tracking-tight flex-shrink-0 mr-2 sm:mr-4"
             onClick={() => setIsMenuOpen(false)}
           >
-            <img src={Logo} alt="Logo" className="w-6 h-6 sm:w-8 sm:h-8 mr-2" />
-            <span className="hidden sm:inline">CodeToGame</span>
-            <span className="sm:hidden">CTG</span>
+            <img src={Logo} alt="Logo" className="w-5 h-5 sm:w-6 sm:h-6 mr-1 sm:mr-2" />
+            {/* Responsive logo text */}
+            <span className="hidden xl:inline">CodeToGame</span>
+            <span className="hidden lg:inline xl:hidden">C2G</span>
+            <span className="lg:hidden">CTG</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`font-medium hover:text-indigo-400 transition px-3 py-2 rounded-md text-sm ${
-                  location.pathname === item.path
-                    ? "text-indigo-400 font-semibold bg-gray-700"
-                    : "text-white"
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
-            
+          {/* Desktop Navigation - More compact */}
+          <div className="hidden lg:flex items-center justify-center flex-1 desktop-nav">
+            <div className="nav-items-container">
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`nav-item font-medium hover:text-indigo-400 transition rounded-md ${
+                    location.pathname === item.path
+                      ? "text-indigo-400 font-semibold bg-gray-700"
+                      : "text-white"
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Auth Section - Compact */}
+          <div className="hidden lg:flex items-center auth-section">
             {isAuthenticated ? (
-              <div className="flex items-center space-x-3 ml-4">
-                <span className="text-sm text-gray-300">
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-gray-300 username-text">
                   Hi, {user?.username || 'User'}
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-full transition text-sm"
+                  className="bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-1.5 rounded-full transition text-xs"
                 >
                   Logout
                 </button>
@@ -80,7 +87,7 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/login"
-                className="bg-cyan-400 hover:bg-cyan-500 text-black font-semibold px-4 py-2 rounded-full transition text-sm ml-4"
+                className="bg-cyan-400 hover:bg-cyan-500 text-black font-semibold px-3 py-1.5 rounded-full transition text-xs"
               >
                 Login
               </Link>
@@ -118,8 +125,8 @@ const Navbar = () => {
 
         {/* Mobile Navigation Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-700 rounded-lg mt-2">
+          <div className="lg:hidden mobile-nav">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-gray-700 rounded-lg mt-2">
               {navItems.map((item) => (
                 <Link
                   key={item.name}

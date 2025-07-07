@@ -188,31 +188,53 @@ exports.updateGame = async (req, res) => {
 // Delete game
 exports.deleteGame = async (req, res) => {
   try {
-    const game = await Game.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+    const gameId = req.params.id; // ✅ Define gameId first
+    
+    const game = await Game.findOneAndDelete({ _id: gameId, user: req.user.id });
     
     if (!game) {
       return res.status(404).json({ message: 'Game not found or unauthorized' });
     }
 
+    // ✅ Fix the user update - remove the game from user's gamesCreated array
     await User.findByIdAndUpdate(
       req.user.id,
       { 
-        $pull: { gamesCreated: { game: gameId } },
+        $pull: { gamesCreated: gameId }, // ✅ Fixed: was { game: gameId }
         $inc: { 'gameStats.gamesCreated': -1 }
       }
     );
 
-    res.json({ message: 'Game deleted successfully' });
+    // ✅ Also delete the thumbnail file if it exists
+    if (game.assets && game.assets.thumbnail) {
+      const thumbnailPath = path.join(__dirname, '..', game.assets.thumbnail);
+      if (fs.existsSync(thumbnailPath)) {
+        fs.unlinkSync(thumbnailPath);
+        console.log('✅ Deleted thumbnail file:', thumbnailPath);
+      }
+    }
+
+    console.log('✅ Game deleted successfully:', gameId);
+    res.json({ 
+      success: true, 
+      message: 'Game deleted successfully' 
+    });
   } catch (error) {
-    console.error('Error deleting game:', error);
-    res.status(500).json({ message: 'Error deleting game' });
+    console.error('❌ Error deleting game:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error deleting game',
+      error: error.message 
+    });
   }
 };
 
 // Toggle like
 exports.toggleLike = async (req, res) => {
   try {
-    const game = await Game.findById(req.params.id);
+    const gameId = req.params.id; // ✅ Define gameId first
+    
+    const game = await Game.findById(gameId);
     
     if (!game) {
       return res.status(404).json({ message: 'Game not found' });
@@ -229,15 +251,17 @@ exports.toggleLike = async (req, res) => {
     }
 
     await game.save();
+    
+    // ✅ Update user's likedGames array
     if (isLiked) {
       // Remove like
       await User.findByIdAndUpdate(req.user.id, { 
-        $pull: { likedGames: gameId }
+        $pull: { likedGames: gameId } // ✅ Fixed: was gameId without defining it
       });
     } else {
       // Add like
       await User.findByIdAndUpdate(req.user.id, { 
-        $addToSet: { likedGames: gameId }
+        $addToSet: { likedGames: gameId } // ✅ Fixed: was gameId without defining it
       });
     }
 
@@ -249,8 +273,12 @@ exports.toggleLike = async (req, res) => {
       likesCount: game.likesCount
     });
   } catch (error) {
-    console.error('Error toggling like:', error);
-    res.status(500).json({ message: 'Error toggling like' });
+    console.error('❌ Error toggling like:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error toggling like',
+      error: error.message 
+    });
   }
 };
 

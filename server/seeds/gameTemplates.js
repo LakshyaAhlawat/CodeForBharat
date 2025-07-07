@@ -7,10 +7,10 @@ const gameTemplates = [
     name: 'platformer',
     displayName: 'Platform Adventure',
     description: 'Classic side-scrolling platformer with jumping mechanics',
-    type: 'platformer',
+    type: 'platformer', // ✅ Make sure this is set
     thumbnail: '/templates/platformer-thumb.png',
     defaultConfig: {
-      type: 'platformer',
+      type: 'platformer', // ✅ And this too
       width: 800,
       height: 600,
       player: {

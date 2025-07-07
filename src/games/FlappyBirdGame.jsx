@@ -1,8 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { recordPlay } from '../store/slices/gameSlice';
 
-const FlappyBirdGame = ({ gameConfig, gameId }) => {
+const FlappyBirdGame = ({ 
+  gameConfig = {}, 
+  gameId = null, 
+  onScoreUpdate = () => {}, 
+  onGameOver = () => {} 
+}) => {
   const canvasRef = useRef(null);
   const gameRef = useRef(null);
   const [score, setScore] = useState(0);
@@ -10,11 +15,26 @@ const FlappyBirdGame = ({ gameConfig, gameId }) => {
   const [highScore, setHighScore] = useState(0);
   const dispatch = useDispatch();
 
+  // ✅ Helper function for rounded rectangles (cross-browser compatible)
+  const drawRoundedRect = (ctx, x, y, width, height, radius) => {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     
-    // Game configuration from template
+    // Game configuration from template with better defaults
     const config = {
       bird: {
         x: 100,
@@ -22,16 +42,16 @@ const FlappyBirdGame = ({ gameConfig, gameId }) => {
         width: 30,
         height: 30,
         velocity: 0,
-        gravity: gameConfig?.world?.gravity / 100 || 0.6,
-        jumpForce: gameConfig?.player?.flapForce / 20 || -12,
+        gravity: gameConfig?.world?.gravity ? gameConfig.world.gravity / 100 : 0.5, // ✅ Reduced gravity
+        jumpForce: gameConfig?.player?.flapForce ? gameConfig.player.flapForce / 20 : -10, // ✅ Better jump force
         color: gameConfig?.player?.color || '#FFD700'
       },
       pipes: [],
       score: 0,
       pipeWidth: 80,
       pipeGap: 150,
-      pipeSpeed: gameConfig?.world?.scrollSpeed / 50 || 3,
-      gameStarted: false,
+      pipeSpeed: gameConfig?.world?.scrollSpeed ? gameConfig.world.scrollSpeed / 50 : 2, // ✅ Slower pipes
+      gameStarted: false, // ✅ Important flag
       gameOver: false
     };
 
@@ -53,8 +73,8 @@ const FlappyBirdGame = ({ gameConfig, gameId }) => {
       };
     };
 
-    // Initialize first pipe
-    config.pipes.push(createPipe());
+    // ✅ Don't add pipes until game starts
+    // config.pipes.push(createPipe());
 
     // Input handling
     const handleInput = (e) => {
@@ -64,6 +84,9 @@ const FlappyBirdGame = ({ gameConfig, gameId }) => {
         if (gameState === 'waiting') {
           setGameState('playing');
           config.gameStarted = true;
+          config.bird.velocity = config.bird.jumpForce; // ✅ Initial flap when starting
+          config.pipes.push(createPipe()); // ✅ Add first pipe when starting
+          
           if (gameId) {
             dispatch(recordPlay(gameId));
           }
@@ -78,7 +101,7 @@ const FlappyBirdGame = ({ gameConfig, gameId }) => {
           config.bird.x = 100;
           config.bird.y = canvas.height / 2;
           config.bird.velocity = 0;
-          config.pipes = [createPipe()];
+          config.pipes = []; // ✅ Clear pipes on restart
           config.score = 0;
           config.gameOver = false;
           config.gameStarted = false;
@@ -99,95 +122,31 @@ const FlappyBirdGame = ({ gameConfig, gameId }) => {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       if (gameState === 'waiting') {
-        // Start screen
+        // Start screen - bird doesn't fall yet
         ctx.fillStyle = 'white';
         ctx.font = 'bold 28px Arial';
         ctx.textAlign = 'center';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.strokeText('Flappy Bird', canvas.width / 2, canvas.height / 2 - 60);
         ctx.fillText('Flappy Bird', canvas.width / 2, canvas.height / 2 - 60);
+        
         ctx.font = '18px Arial';
+        ctx.strokeText('Press SPACE or Click to Start', canvas.width / 2, canvas.height / 2 - 20);
         ctx.fillText('Press SPACE or Click to Start', canvas.width / 2, canvas.height / 2 - 20);
+        
         ctx.font = '14px Arial';
+        ctx.strokeText('Press SPACE or Click to Flap', canvas.width / 2, canvas.height / 2 + 10);
         ctx.fillText('Press SPACE or Click to Flap', canvas.width / 2, canvas.height / 2 + 10);
         
         if (highScore > 0) {
+          ctx.strokeText(`High Score: ${highScore}`, canvas.width / 2, canvas.height / 2 + 40);
           ctx.fillText(`High Score: ${highScore}`, canvas.width / 2, canvas.height / 2 + 40);
         }
         
-        // Draw bird
+        // ✅ Draw bird using custom rounded rect function
         ctx.fillStyle = config.bird.color;
-        ctx.fillRect(config.bird.x, config.bird.y, config.bird.width, config.bird.height);
-      } 
-      else if (gameState === 'playing' && !config.gameOver) {
-        // Update bird physics
-        config.bird.velocity += config.bird.gravity;
-        config.bird.y += config.bird.velocity;
-
-        // Update pipes
-        config.pipes.forEach((pipe, index) => {
-          pipe.x -= config.pipeSpeed;
-
-          // Check if bird passed pipe for scoring
-          if (!pipe.counted && pipe.x + config.pipeWidth < config.bird.x) {
-            pipe.counted = true;
-            config.score++;
-            setScore(config.score);
-          }
-
-          // Remove off-screen pipes
-          if (pipe.x + config.pipeWidth < 0) {
-            config.pipes.splice(index, 1);
-          }
-        });
-
-        // Add new pipes
-        if (config.pipes.length === 0 || config.pipes[config.pipes.length - 1].x < canvas.width - 250) {
-          config.pipes.push(createPipe());
-        }
-
-        // Collision detection
-        config.pipes.forEach(pipe => {
-          // Top pipe collision
-          if (config.bird.x + config.bird.width > pipe.x &&
-              config.bird.x < pipe.x + config.pipeWidth &&
-              config.bird.y < pipe.topHeight) {
-            config.gameOver = true;
-            setGameState('gameOver');
-          }
-
-          // Bottom pipe collision
-          if (config.bird.x + config.bird.width > pipe.x &&
-              config.bird.x < pipe.x + config.pipeWidth &&
-              config.bird.y + config.bird.height > pipe.bottomY) {
-            config.gameOver = true;
-            setGameState('gameOver');
-          }
-        });
-
-        // Ground and ceiling collision
-        if (config.bird.y + config.bird.height > canvas.height || config.bird.y < 0) {
-          config.gameOver = true;
-          setGameState('gameOver');
-        }
-
-        // Draw pipes
-        ctx.fillStyle = '#228B22';
-        config.pipes.forEach(pipe => {
-          // Top pipe
-          ctx.fillRect(pipe.x, 0, config.pipeWidth, pipe.topHeight);
-          // Bottom pipe
-          ctx.fillRect(pipe.x, pipe.bottomY, config.pipeWidth, pipe.bottomHeight);
-          
-          // Pipe caps
-          ctx.fillStyle = '#1e5f1e';
-          ctx.fillRect(pipe.x - 5, pipe.topHeight - 20, config.pipeWidth + 10, 20);
-          ctx.fillRect(pipe.x - 5, pipe.bottomY, config.pipeWidth + 10, 20);
-          ctx.fillStyle = '#228B22';
-        });
-
-        // Draw bird
-        ctx.fillStyle = config.bird.color;
-        ctx.beginPath();
-        ctx.roundRect(config.bird.x, config.bird.y, config.bird.width, config.bird.height, 5);
+        drawRoundedRect(ctx, config.bird.x, config.bird.y, config.bird.width, config.bird.height, 5);
         ctx.fill();
 
         // Draw bird eye
@@ -198,6 +157,110 @@ const FlappyBirdGame = ({ gameConfig, gameId }) => {
         ctx.fillStyle = 'black';
         ctx.beginPath();
         ctx.arc(config.bird.x + 22, config.bird.y + 10, 3, 0, Math.PI * 2);
+        ctx.fill();
+      } 
+      else if (gameState === 'playing' && !config.gameOver) {
+        // ✅ Only apply physics when game is actually playing
+        if (config.gameStarted) {
+          // Update bird physics
+          config.bird.velocity += config.bird.gravity;
+          config.bird.y += config.bird.velocity;
+
+          // Update pipes
+          config.pipes.forEach((pipe, index) => {
+            pipe.x -= config.pipeSpeed;
+
+            // Check if bird passed pipe for scoring
+            if (!pipe.counted && pipe.x + config.pipeWidth < config.bird.x) {
+              pipe.counted = true;
+              config.score++;
+              setScore(config.score);
+              onScoreUpdate(config.score);
+            }
+
+            // Remove off-screen pipes
+            if (pipe.x + config.pipeWidth < 0) {
+              config.pipes.splice(index, 1);
+            }
+          });
+
+          // Add new pipes
+          if (config.pipes.length === 0 || config.pipes[config.pipes.length - 1].x < canvas.width - 200) {
+            config.pipes.push(createPipe());
+          }
+
+          // Collision detection
+          config.pipes.forEach(pipe => {
+            // Top pipe collision
+            if (config.bird.x + config.bird.width > pipe.x &&
+                config.bird.x < pipe.x + config.pipeWidth &&
+                config.bird.y < pipe.topHeight) {
+              config.gameOver = true;
+              setGameState('gameOver');
+              onGameOver(config.score, highScore);
+            }
+
+            // Bottom pipe collision
+            if (config.bird.x + config.bird.width > pipe.x &&
+                config.bird.x < pipe.x + config.pipeWidth &&
+                config.bird.y + config.bird.height > pipe.bottomY) {
+              config.gameOver = true;
+              setGameState('gameOver');
+              onGameOver(config.score, highScore);
+            }
+          });
+
+          // Ground and ceiling collision
+          if (config.bird.y + config.bird.height > canvas.height || config.bird.y < 0) {
+            config.gameOver = true;
+            setGameState('gameOver');
+            onGameOver(config.score, highScore);
+          }
+        }
+
+        // ✅ Draw pipes with better visibility
+        config.pipes.forEach(pipe => {
+          // Top pipe
+          ctx.fillStyle = '#228B22';
+          ctx.fillRect(pipe.x, 0, config.pipeWidth, pipe.topHeight);
+          
+          // Bottom pipe
+          ctx.fillRect(pipe.x, pipe.bottomY, config.pipeWidth, pipe.bottomHeight);
+          
+          // Pipe caps for better visual
+          ctx.fillStyle = '#1e5f1e';
+          ctx.fillRect(pipe.x - 5, pipe.topHeight - 20, config.pipeWidth + 10, 20);
+          ctx.fillRect(pipe.x - 5, pipe.bottomY, config.pipeWidth + 10, 20);
+          
+          // ✅ Add pipe borders for better visibility
+          ctx.strokeStyle = '#0f3f0f';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(pipe.x, 0, config.pipeWidth, pipe.topHeight);
+          ctx.strokeRect(pipe.x, pipe.bottomY, config.pipeWidth, pipe.bottomHeight);
+        });
+
+        // ✅ Draw bird using custom rounded rect function
+        ctx.fillStyle = config.bird.color;
+        drawRoundedRect(ctx, config.bird.x, config.bird.y, config.bird.width, config.bird.height, 5);
+        ctx.fill();
+
+        // Draw bird eye
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(config.bird.x + 20, config.bird.y + 10, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(config.bird.x + 22, config.bird.y + 10, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Add beak
+        ctx.fillStyle = '#FFA500';
+        ctx.beginPath();
+        ctx.moveTo(config.bird.x + config.bird.width, config.bird.y + 12);
+        ctx.lineTo(config.bird.x + config.bird.width + 8, config.bird.y + 15);
+        ctx.lineTo(config.bird.x + config.bird.width, config.bird.y + 18);
+        ctx.closePath();
         ctx.fill();
       }
 
@@ -219,7 +282,7 @@ const FlappyBirdGame = ({ gameConfig, gameId }) => {
           setHighScore(config.score);
         }
         
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         ctx.fillStyle = 'white';
@@ -255,7 +318,7 @@ const FlappyBirdGame = ({ gameConfig, gameId }) => {
       document.removeEventListener('keydown', handleInput);
       canvas.removeEventListener('click', handleInput);
     };
-  }, [gameConfig, gameId, gameState, highScore, dispatch]);
+  }, [gameConfig, gameId, gameState, highScore, dispatch, onScoreUpdate, onGameOver]);
 
   return (
     <div className="flex flex-col items-center">
@@ -281,6 +344,7 @@ const FlappyBirdGame = ({ gameConfig, gameId }) => {
       <div className="mt-4 text-center text-white">
         <p className="text-sm">Use SPACE or Click to flap and avoid the pipes!</p>
         {gameState === 'waiting' && <p className="text-xs text-gray-300">Click anywhere to start</p>}
+        {gameState === 'playing' && <p className="text-xs text-gray-300">Keep flapping to stay airborne!</p>}
       </div>
     </div>
   );

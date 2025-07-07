@@ -12,7 +12,6 @@ import { checkAuth } from './store/slices/authSlice';
 // Import your game components
 import FlappyBirdGame from './games/FlappyBirdGame';
 import PlatformerGame from './games/PlatformerGame';
-import FlappyGame from './games/FlappyGame'; // This uses Phaser
 
 // Import all other components
 import Navbar from './components/Navbar';
@@ -34,7 +33,6 @@ import About from './pages/About';
 import Leaderboard from './pages/Leaderboard';
 import Contact from './pages/Contact';
 import Games from './pages/Games';
-import GamePlay from './pages/GamePlay';
 import TemplatePreview from './pages/TemplatePreview';
 import Community from './pages/Community';
 import GameReviews from './pages/GameReviews';
@@ -68,15 +66,13 @@ const AppContent = () => {
           <Route path="/community" element={<Community />} />
           
           {/* Standalone Game Routes - These use your custom game components */}
-          <Route path="/game/flappy" element={<FlappyGame />} /> {/* Phaser version */}
-          <Route path="/game/flappy-canvas" element={<FlappyBirdGame />} /> {/* Canvas version */}
-          <Route path="/game/platformer" element={<PlatformerGame />} /> {/* Your platformer */}
+          <Route path="/game/flappy" element={<FlappyBirdGame />} />
+          <Route path="/game/platformer" element={<PlatformerGame />} />
           
           {/* Template-based Game Routes - These use GamePlayer */}
           <Route path="/games" element={<Games />} />
           <Route path="/games/:gameId/play" element={<GamePlayer />} />
           <Route path="/games/:gameId/reviews" element={<GameReviews />} />
-          <Route path="/games/:gameId/gameplay" element={<GamePlay />} />
           
           {/* Protected Routes */}
           <Route path="/dashboard" element={
