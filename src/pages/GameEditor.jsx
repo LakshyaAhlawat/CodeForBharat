@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchGame, updateGameVisibility, updateGame } from '../store/slices/gameSlice';
 import { toast } from 'react-hot-toast';
 import AOS from 'aos';
+import BackgroundSelector from '../components/BackgroundSelector';
 
 const GameEditor = () => {
   const { gameId } = useParams();
@@ -110,6 +111,14 @@ const GameEditor = () => {
       toast.error('Failed to unpublish game');
     }
   };
+
+  const backgroundOptions = [
+    { value: 'day', label: '🌅 Day Sky', preview: '#87CEEB' },
+    { value: 'night', label: '🌙 Night Sky', preview: '#191970' },
+    { value: 'sunset', label: '🌅 Sunset', preview: '#FF6347' },
+    { value: 'space', label: '🚀 Space', preview: '#000000' },
+    { value: 'forest', label: '🌲 Forest', preview: '#228B22' }
+  ];
 
   if (isLoading) {
     return (
@@ -269,6 +278,25 @@ const GameEditor = () => {
                     />
                   )}
                 </div>
+
+                {isEditing && currentGame.type === 'flappy' && (
+                  <div className="mt-6">
+                    <BackgroundSelector
+                      selectedBackground={editedGame.phaserConfig?.world?.backgroundType || 'day'}
+                      onBackgroundChange={(bg) => setEditedGame({
+                        ...editedGame,
+                        phaserConfig: {
+                          ...editedGame.phaserConfig,
+                          world: {
+                            ...editedGame.phaserConfig?.world,
+                            backgroundType: bg
+                          }
+                        }
+                      })}
+                      options={backgroundOptions}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

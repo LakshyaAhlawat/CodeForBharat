@@ -54,7 +54,21 @@ export const fetchTemplateById = createAsyncThunk(
             width: 800,
             height: 600,
             player: { flapForce: 250, color: '#ffd93d' },
-            world: { gravity: 400, background: '#87CEEB' }
+            world: { 
+              gravity: 400, 
+              background: '#87CEEB',
+              backgroundType: 'day' // Add this new property
+            }
+          },
+          // Add customization options
+          customizationOptions: {
+            backgroundTypes: [
+              { value: 'day', label: '🌅 Day Sky', preview: '#87CEEB' },
+              { value: 'night', label: '🌙 Night Sky', preview: '#191970' },
+              { value: 'sunset', label: '🌅 Sunset', preview: '#FF6347' },
+              { value: 'space', label: '🚀 Space', preview: '#000000' },
+              { value: 'forest', label: '🌲 Forest', preview: '#228B22' }
+            ]
           }
         },
         {
@@ -201,7 +215,21 @@ export const fetchTemplates = createAsyncThunk(
               width: 800,
               height: 600,
               player: { flapForce: 250, color: '#ffd93d' },
-              world: { gravity: 400, background: '#87CEEB' }
+              world: { 
+                gravity: 400, 
+                background: '#87CEEB',
+                backgroundType: 'day' // Add this new property
+              }
+            },
+            // Add customization options
+            customizationOptions: {
+              backgroundTypes: [
+                { value: 'day', label: '🌅 Day Sky', preview: '#87CEEB' },
+                { value: 'night', label: '🌙 Night Sky', preview: '#191970' },
+                { value: 'sunset', label: '🌅 Sunset', preview: '#FF6347' },
+                { value: 'space', label: '🚀 Space', preview: '#000000' },
+                { value: 'forest', label: '🌲 Forest', preview: '#228B22' }
+              ]
             }
           },
           {

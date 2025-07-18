@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createGameFromTemplate } from '../store/slices/templateSlice';
 import { toast } from 'react-hot-toast';
 import AOS from 'aos';
+import BackgroundSelector from '../components/BackgroundSelector';
 
 const TemplateCustomize = () => {
   const { templateId } = useParams();
@@ -24,6 +25,15 @@ const TemplateCustomize = () => {
   const [floatingElements, setFloatingElements] = useState([]);
   const [activeSection, setActiveSection] = useState('details');
   const [previewAnimation, setPreviewAnimation] = useState(false);
+  const [selectedBackground, setSelectedBackground] = useState('day');
+
+  const backgroundOptions = [
+    { value: 'day', label: '🌅 Day Sky', preview: '#87CEEB' },
+    { value: 'night', label: '🌙 Night Sky', preview: '#191970' },
+    { value: 'sunset', label: '🌅 Sunset', preview: '#FF6347' },
+    { value: 'space', label: '🚀 Space', preview: '#000000' },
+    { value: 'forest', label: '🌲 Forest', preview: '#228B22' }
+  ];
 
   useEffect(() => {
     AOS.init({
@@ -177,7 +187,13 @@ const TemplateCustomize = () => {
         description: gameData.description.trim() || template.description,
         type: template.type,
         gameData: gameConfig,
-        phaserConfig: gameConfig
+        phaserConfig: {
+          ...gameConfig,
+          world: {
+            ...gameConfig.world,
+            backgroundType: selectedBackground
+          }
+        }
       };
       
       const result = await dispatch(createGameFromTemplate({
@@ -391,6 +407,22 @@ const TemplateCustomize = () => {
                             </div>
                           </div>
                         </div>
+
+                        {/* Background Selector */}
+                        {template.type === 'flappy' && (
+                          <div className="space-y-6">
+                            <h3 className="text-2xl font-bold text-white flex items-center gap-3 mb-6">
+                              <span className="text-3xl">🌌</span>
+                              Game Background
+                            </h3>
+                            
+                            <BackgroundSelector
+                              selectedBackground={selectedBackground}
+                              onBackgroundChange={setSelectedBackground}
+                              options={backgroundOptions}
+                            />
+                          </div>
+                        )}
 
                         {/* Enhanced Submit Button */}
                         <div className="flex flex-col sm:flex-row gap-6">

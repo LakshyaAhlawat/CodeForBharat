@@ -71,7 +71,12 @@ const gameTemplates = [
       width: 800,
       height: 600,
       player: { speed: 0, jumpHeight: 300, sprite: 'bird', flapForce: -250 },
-      world: { gravity: 600, background: '#70C5CE', scrollSpeed: 120 },
+      world: { 
+        gravity: 600, 
+        background: '#70C5CE', 
+        scrollSpeed: 120,
+        backgroundType: 'day' // Make sure this is here
+      },
       enemies: [
         { type: 'pipe_top', speed: 0, sprite: 'pipe_top', spawnRate: 2500, health: 1, points: 0 }
       ],
@@ -80,6 +85,15 @@ const gameTemplates = [
       ],
       controls: { flap: 'SPACE' },
       gameRules: { winCondition: 'high_score', loseCondition: 'touch_pipe_or_ground', endless: true }
+    },
+    customizationOptions: {
+      backgroundTypes: [
+        { value: 'day', label: 'Day Sky', preview: '#87CEEB' },
+        { value: 'night', label: 'Night Sky', preview: '#191970' },
+        { value: 'sunset', label: 'Sunset', preview: '#FF6347' },
+        { value: 'space', label: 'Space', preview: '#000000' },
+        { value: 'forest', label: 'Forest', preview: '#228B22' }
+      ]
     },
     isActive: true
   },
